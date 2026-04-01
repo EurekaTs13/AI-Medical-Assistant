@@ -1,0 +1,16 @@
+<view class="page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav-bar" style="top: {{navBarStyle.top}}; height: {{navBarStyle.height}}; line-height: {{navBarStyle.lineHeight}};">
+    <view class="nav-left" bindtap="navigateBack">
+      <image class="back-btn" src="/images/icons/返回.png" mode="aspectFill"></image>
+    </view>
+    <view class="nav-title">设置</view>
+    <view class="nav-right" style="right: {{navBarStyle.right}};"></view>
+  </view>
+  
+  <view class="container">
+    <view class="section">
+      <button class="logout-btn" bindtap="onLogout">退出登录</button>
+    </view>
+  </view>
+</view>

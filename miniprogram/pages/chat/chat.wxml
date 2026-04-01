@@ -1,0 +1,115 @@
+<view class="page">
+  <!-- 侧边栏 -->
+  <view class="sidebar" style="transform: translateX({{sidebarOpen ? '0' : '-100%'}}); width: {{sidebarWidth}}px;">
+    <view class="sidebar-content" style="padding-top: {{navBarStyle.top}}; padding-left: 32rpx; padding-right: 32rpx;">
+      <view class="sidebar-header" style="height: {{navBarStyle.height}};">
+        <view class="sidebar-title">历史对话</view>
+      </view>
+      <view class="history-list">
+        <block wx:if="{{historyDialogs.length === 0}}">
+          <view class="no-history">暂无历史对话</view>
+        </block>
+        <block wx:else>
+          <view 
+            class="history-item" 
+            wx:for="{{historyDialogs}}" 
+            wx:key="_id"
+            data-dialog-id="{{item._id}}"
+            bindtap="openHistoryDialog"
+          >
+            <view class="history-title">{{item.title}}</view>
+            <view class="history-time">{{item.formattedTime}}</view>
+          </view>
+        </block>
+      </view>
+    </view>
+    <view class="user-info-section" bindtap="navigateToSettings">
+      <image class="user-avatar" src="{{userInfo ? (userInfo.avatar_url || '/images/avatar.png') : '/images/avatar.png'}}" mode="aspectFill"></image>
+      <view class="user-nickname">{{userInfo ? (userInfo.nickname || userInfo.phone_number || '用户') : '未登录'}}</view>
+    </view>
+  </view>
+  
+  <!-- 遮罩层 -->
+  <view wx:if="{{sidebarOpen}}" class="overlay" bindtap="toggleSidebar"></view>
+  
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav-bar" style="top: {{navBarStyle.top}}; height: {{navBarStyle.height}}; line-height: {{navBarStyle.lineHeight}};">
+    <view class="nav-left">
+      <image class="more-btn" src="/images/icons/more.png" mode="aspectFill" bindtap="toggleSidebar"></image>
+      <image class="new-chat-btn" src="/images/icons/新对话-copy.png" mode="aspectFill" bindtap="startNewChat"></image>
+    </view>
+    <view class="nav-title">AI 医疗助手</view>
+    <view class="nav-right" style="right: {{navBarStyle.right}};"></view>
+  </view>
+
+  <!-- 中部区域：标题 + 回答展示 -->
+  <view class="center" style="padding-top: {{centerPaddingTop}}px;">
+    <!-- 初始状态：显示标题和提示 -->
+    <view wx:if="{{messages.length === 0 && !loading}}" class="initial-state">
+      <view class="title">AI 医疗助手</view>
+      <view class="subtitle">描述症状，我会给出可能的方向与建议</view>
+    </view>
+    
+    <!-- 对话状态：显示对话消息 -->
+    <scroll-view wx:else class="message-list" scroll-y="true" scroll-into-view="{{scrollToView}}" scroll-with-animation="true" enable-flex="true">
+      <!-- 对话消息列表 -->
+      <block wx:for="{{messages}}" wx:key="{{index}}">
+        <!-- 用户消息 -->
+        <view wx:if="{{item.type === 'user'}}" class="message-item user-message" id="message-{{index}}">
+          <view class="message-content user-content">
+            {{item.content}}
+          </view>
+        </view>
+        
+        <!-- AI消息 -->
+        <view wx:else class="message-item ai-message" id="message-{{index}}">
+          <view class="message-content ai-content">
+            {{item.content}}
+          </view>
+        </view>
+      </block>
+      
+      <!-- 加载中状态 -->
+      <view wx:if="{{loading}}" class="message-item ai-message" id="message-loading">
+        <view class="message-content ai-content">
+          正在思考...
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部输入栏 -->
+  <view class="composer" style="padding-bottom: calc(16rpx + env(safe-area-inset-bottom));">
+    <view class="composer-inner">
+      <textarea
+        class="input"
+        placeholder="请输入症状，例如：咳嗽三天、喉咙痛、低烧"
+        placeholder-class="placeholder"
+        value="{{text}}"
+        bindinput="onInput"
+        bindconfirm="onSend"
+        auto-height
+        maxlength="1000"
+      />
+      <button
+        class="send"
+        hover-class="send-hover"
+        disabled="{{!canSend}}"
+        bindtap="onSend"
+      >
+        发送
+      </button>
+    </view>
+    <view class="hint">提示：我不是医生，如有紧急情况请立即就医/拨打急救电话。</view>
+  </view>
+
+  <!-- 登录提示底部弹窗 -->
+  <view wx:if="{{loginModalVisible}}" class="modal-overlay" bindtap="hideLoginModal"></view>
+  <view wx:if="{{loginModalVisible}}" class="login-modal">
+    <view class="login-modal-content">
+      <view class="login-modal-title">请先登录</view>
+      <button class="login-btn wechat-login" bindtap="onWechatLogin">微信一键登录</button>
+      <button class="login-btn cancel" bindtap="hideLoginModal">取消</button>
+    </view>
+  </view>
+</view>
