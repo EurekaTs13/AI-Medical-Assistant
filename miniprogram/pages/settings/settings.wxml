@@ -1,16 +1,175 @@
+<!-- pages/settings/settings.wxml -->
 <view class="page">
-  <!-- 自定义导航栏 -->
-  <view class="custom-nav-bar" style="top: {{navBarStyle.top}}; height: {{navBarStyle.height}}; line-height: {{navBarStyle.lineHeight}};">
-    <view class="nav-left" bindtap="navigateBack">
-      <image class="back-btn" src="/images/icons/返回.png" mode="aspectFill"></image>
+  <!-- 伪装导航栏组件 - 吸附在顶部 -->
+  <view class="fake-nav-bar" style="height: 185rpx; display: flex; box-sizing: border-box; left: 6rpx; top: -12rpx; position: sticky">
+    <!-- 返回按钮 -->
+    <view class="nav-back-btn" bindtap="navigateBack" style="position: relative; left: -4rpx; top: 43rpx">
+      <view class="back-icon">＜</view>
+      <!-- <view class="back-text"></view> -->
     </view>
-    <view class="nav-title">设置</view>
-    <view class="nav-right" style="right: {{navBarStyle.right}};"></view>
+    
+    <!-- 标题 -->
+    <view class="nav-title" style="position: relative; left: 6rpx; top: 43rpx">设置</view>
+    
+    <!-- 右侧占位符 -->
+    <view class="nav-placeholder"></view>
   </view>
-  
-  <view class="container">
-    <view class="section">
-      <button class="logout-btn" bindtap="onLogout">退出登录</button>
+
+  <!-- 主内容区域 -->
+  <view class="main-content">
+    <!-- 顶部用户信息卡片 -->
+    <view class="user-card" bindtap="navigateToProfile">
+      <view class="user-avatar">
+        <block wx:if="{{userInfo && userInfo.avatarUrl}}">
+          <image src="{{userInfo.avatarUrl}}" mode="aspectFill" class="avatar-image"></image>
+        </block>
+        <block wx:else>
+          <view class="default-avatar">👤</view>
+        </block>
+      </view>
+      <view class="user-info">
+        <view class="user-nickname">{{userInfo ? (userInfo.nickname || '用户') : '点击登录'}}</view>
+      </view>
+      <view class="arrow-icon">›</view>
+    </view>
+
+    <!-- 设置选项列表 -->
+    <view class="settings-list">
+      <!-- 账号与安全 -->
+      <view class="settings-section">
+        <view class="section-title">账号与安全</view>
+        <view class="setting-item" bindtap="navigateToAccount">
+          <view class="item-left">
+            <view class="item-icon">🔐</view>
+            <view class="item-text">账号安全</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+        <view class="setting-item" bindtap="navigateToPrivacy">
+          <view class="item-left">
+            <view class="item-icon">👁️</view>
+            <view class="item-text">隐私设置</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+      </view>
+
+      <!-- 通用设置 -->
+      <view class="settings-section">
+        <view class="section-title">通用设置</view>
+        <view class="setting-item" bindtap="navigateToNotification">
+          <view class="item-left">
+            <view class="item-icon">🔔</view>
+            <view class="item-text">消息通知</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+        <view class="setting-item" bindtap="navigateToAppearance">
+          <view class="item-left">
+            <view class="item-icon">🎨</view>
+            <view class="item-text">外观设置</view>
+          </view>
+          <view class="item-right">
+            <view class="theme-label">{{theme === 'light' ? '浅色' : theme === 'dark' ? '深色' : '跟随系统'}}</view>
+            <view class="arrow-icon">›</view>
+          </view>
+        </view>
+        <view class="setting-item" bindtap="navigateToLanguage">
+          <view class="item-left">
+            <view class="item-icon">🌐</view>
+            <view class="item-text">语言设置</view>
+          </view>
+          <view class="item-right">
+            <view class="language-label">{{language === 'zh_CN' ? '简体中文' : '其他'}}</view>
+            <view class="arrow-icon">›</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 帮助与反馈 -->
+      <view class="settings-section">
+        <view class="section-title">帮助与反馈</view>
+        <view class="setting-item" bindtap="navigateToAbout">
+          <view class="item-left">
+            <view class="item-icon">ℹ️</view>
+            <view class="item-text">关于我们</view>
+          </view>
+          <view class="item-right">
+            <view class="version-label">v{{version}}</view>
+            <view class="arrow-icon">›</view>
+          </view>
+        </view>
+        <view class="setting-item" bindtap="navigateToFeedback">
+          <view class="item-left">
+            <view class="item-icon">💬</view>
+            <view class="item-text">意见反馈</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+        <view class="setting-item" bindtap="navigateToContact">
+          <view class="item-left">
+            <view class="item-icon">📞</view>
+            <view class="item-text">联系我们</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+        <view class="setting-item" bindtap="navigateToAgreement">
+          <view class="item-left">
+            <view class="item-icon">📃</view>
+            <view class="item-text">用户协议</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+        <view class="setting-item" bindtap="navigateToPrivacyPolicy">
+          <view class="item-left">
+            <view class="item-icon">🔏</view>
+            <view class="item-text">隐私政策</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+      </view>
+
+      <!-- 账号管理 -->
+      <view class="settings-section">
+        <view class="section-title">账号管理</view>
+        <view class="setting-item" bindtap="onLogout">
+          <view class="item-left">
+            <view class="item-icon">❎</view>
+            <view class="item-text">退出登录</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+        <view class="setting-item" bindtap="onDeleteAccount">
+          <view class="item-left">
+            <view class="item-icon delete-icon">🗑️</view>
+            <view class="item-text delete-text">注销账号</view>
+          </view>
+          <view class="arrow-icon">›</view>
+        </view>
+      </view>
+
+      <!-- 版本信息 -->
+      <view class="version-info">
+        <view class="copyright">© 2024 AI医疗助手 版权所有</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 注销账号确认对话框 -->
+  <view wx:if="{{showDeleteConfirm}}" class="modal-overlay" bindtap="hideDeleteConfirm"></view>
+  <view 
+    wx:if="{{showDeleteConfirm}}" 
+    class="confirm-modal" 
+  >
+    <view class="modal-content">
+      <view class="modal-title">确认注销账号</view>
+      <view class="modal-message">
+        此操作将永久删除您的账号及相关数据，且无法恢复。确定要继续吗？
+      </view>
+      <view class="modal-actions">
+        <button class="cancel-btn" bindtap="hideDeleteConfirm">取消</button>
+        <button class="confirm-btn delete" bindtap="confirmDeleteAccount">确认</button>
+      </view>
     </view>
   </view>
 </view>
