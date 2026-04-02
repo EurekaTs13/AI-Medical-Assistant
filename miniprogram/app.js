@@ -1,9 +1,10 @@
 // app.js
 App({
   globalData: {
-    userInfo: null,
+    openid: null,
     token: null,
     env: "cloud1-8gqij1hff49654b7",
+		userInfo:null
   },
 
   onLaunch: function () {
@@ -60,11 +61,24 @@ App({
     this.globalData.userInfo = null;
   },
 
-  // 退出登录
-  logout(redirectUrl = '/pages/chat/chat') {
-    this.clearLoginStatus();
-    wx.reLaunch({
-      url: redirectUrl
-    });
+  
+   // 退出登录方法
+	 logout: function() {
+    // 清除全局数据
+    this.globalData.userInfo = null;
+    this.globalData.token = null;
+    
+    // 清除本地存储
+    try {
+      wx.removeStorageSync('userInfo');
+      wx.removeStorageSync('userToken');
+      wx.removeStorageSync('openid');
+    } catch (e) {
+      console.error('清除本地存储失败:', e);
+    }
+
+		wx.reLaunch({
+			url:'/pages/chat/chat?loadWithoutCheck=true'
+		})
   }
 });

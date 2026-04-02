@@ -1,115 +1,394 @@
+<!-- pages/chat/chat.wxml -->
+<!-- 
+  AI医疗助手聊天页面 - 优化版
+  移除了所有图标依赖，使用纯文本和CSS样式
+  简化了布局，确保核心功能可用
+  使用正确的微信API获取头像
+  优化了用户头像显示
+-->
+
 <view class="page">
-  <!-- 侧边栏 -->
-  <view class="sidebar" style="transform: translateX({{sidebarOpen ? '0' : '-100%'}}); width: {{sidebarWidth}}px;">
-    <view class="sidebar-content" style="padding-top: {{navBarStyle.top}}; padding-left: 32rpx; padding-right: 32rpx;">
+  <!-- ========== 侧边栏：历史对话列表 ========== -->
+  <view 
+    class="sidebar {{sidebarOpen ? 'sidebar-open' : ''}}" 
+    style="width: {{sidebarWidth}}px;"
+  >
+    <!-- 侧边栏内容区域 -->
+    <view 
+      class="sidebar-content" 
+      style="padding-top: {{navBarStyle.top}};"
+    >
+      <!-- 侧边栏头部 -->
       <view class="sidebar-header" style="height: {{navBarStyle.height}};">
         <view class="sidebar-title">历史对话</view>
       </view>
-      <view class="history-list">
+      
+      <!-- 历史对话列表 -->
+      <scroll-view class="history-list" scroll-y="{{true}}">
         <block wx:if="{{historyDialogs.length === 0}}">
-          <view class="no-history">暂无历史对话</view>
+          <!-- 空状态提示（纯文本版） -->
+          <view class="empty-state">
+            <view class="empty-icon">💬</view>
+            <view class="empty-text">暂无历史对话</view>
+            <view class="empty-subtext">开始您的第一段对话</view>
+          </view>
         </block>
         <block wx:else>
+          <!-- 历史对话项（简化版） -->
           <view 
-            class="history-item" 
+            class="history-item {{currentDialogId === item._id ? 'active' : ''}}"
             wx:for="{{historyDialogs}}" 
             wx:key="_id"
             data-dialog-id="{{item._id}}"
             bindtap="openHistoryDialog"
           >
-            <view class="history-title">{{item.title}}</view>
-            <view class="history-time">{{item.formattedTime}}</view>
+            <view class="history-item-left">
+              <!-- 历史图标（文本版） -->
+              <view class="history-icon">📄</view>
+              <view class="history-info">
+                <view class="history-title">{{item.title || '无标题对话'}}</view>
+                <view class="history-time">{{item.formattedTime}}</view>
+              </view>
+            </view>
+            <!-- 删除按钮（文本版） -->
+            <view 
+              class="delete-history" 
+              data-dialog-id="{{item._id}}"
+              catchtap="deleteHistoryDialog"
+							style="margin-right: 25rpx;"
+            >
+              <text>🗑️</text>
+            </view>
           </view>
         </block>
-      </view>
-    </view>
-    <view class="user-info-section" bindtap="navigateToSettings">
-      <image class="user-avatar" src="{{userInfo ? (userInfo.avatar_url || '/images/avatar.png') : '/images/avatar.png'}}" mode="aspectFill"></image>
-      <view class="user-nickname">{{userInfo ? (userInfo.nickname || userInfo.phone_number || '用户') : '未登录'}}</view>
-    </view>
-  </view>
-  
-  <!-- 遮罩层 -->
-  <view wx:if="{{sidebarOpen}}" class="overlay" bindtap="toggleSidebar"></view>
-  
-  <!-- 自定义导航栏 -->
-  <view class="custom-nav-bar" style="top: {{navBarStyle.top}}; height: {{navBarStyle.height}}; line-height: {{navBarStyle.lineHeight}};">
-    <view class="nav-left">
-      <image class="more-btn" src="/images/icons/more.png" mode="aspectFill" bindtap="toggleSidebar"></image>
-      <image class="new-chat-btn" src="/images/icons/新对话-copy.png" mode="aspectFill" bindtap="startNewChat"></image>
-    </view>
-    <view class="nav-title">AI 医疗助手</view>
-    <view class="nav-right" style="right: {{navBarStyle.right}};"></view>
-  </view>
-
-  <!-- 中部区域：标题 + 回答展示 -->
-  <view class="center" style="padding-top: {{centerPaddingTop}}px;">
-    <!-- 初始状态：显示标题和提示 -->
-    <view wx:if="{{messages.length === 0 && !loading}}" class="initial-state">
-      <view class="title">AI 医疗助手</view>
-      <view class="subtitle">描述症状，我会给出可能的方向与建议</view>
+      </scroll-view>
     </view>
     
-    <!-- 对话状态：显示对话消息 -->
-    <scroll-view wx:else class="message-list" scroll-y="true" scroll-into-view="{{scrollToView}}" scroll-with-animation="true" enable-flex="true">
-      <!-- 对话消息列表 -->
-      <block wx:for="{{messages}}" wx:key="{{index}}">
-        <!-- 用户消息 -->
-        <view wx:if="{{item.type === 'user'}}" class="message-item user-message" id="message-{{index}}">
-          <view class="message-content user-content">
-            {{item.content}}
-          </view>
+    <!-- 底部用户信息区域 -->
+    <view class="user-info-section" bindtap="navigateToSettings">
+      <!-- 用户头像容器 -->
+      <view class="avatar-wrapper">
+        <!-- 用户头像（使用image组件） -->
+        <view class="user-avatar">
+          <block wx:if="{{userInfo && userInfo.avatarUrl}}">
+            <!-- 用户已登录且有头像：显示真实头像 -->
+            <image 
+              src="{{userInfo.avatarUrl}}" 
+              mode="aspectFill"
+              class="avatar-image"
+            ></image>
+          </block>
+          <block wx:else>
+            <!-- 用户未登录或无头像：显示默认头像 -->
+            <view class="default-avatar">👤</view>
+          </block>
         </view>
+        <!-- 登录状态指示器 -->
+        <view class="online-status {{userInfo ? 'online' : 'offline'}}"></view>
+      </view>
+      <!-- 用户昵称和状态 -->
+      <view class="user-details">
+        <view class="user-nickname">
+          {{userInfo ? (userInfo.nickname || userInfo.phone_number || '用户') : '未登录'}}
+        </view>
+        <view class="user-status">
+          {{userInfo ? '在线' : '点击登录'}}
+        </view>
+      </view>
+      <!-- 设置入口（文本版） -->
+      <view class="settings-entry">⚙️</view>
+    </view>
+  </view>
+  
+  <!-- ========== 遮罩层：点击关闭侧边栏 ========== -->
+  <view 
+    wx:if="{{sidebarOpen}}" 
+    class="overlay" 
+    bindtap="toggleSidebar"
+  ></view>
+  
+  <!-- ========== 自定义导航栏 ========== -->
+  <view 
+    class="custom-nav-bar" 
+    style="top: {{navBarStyle.top}}; height: {{navBarStyle.height}}; line-height: {{navBarStyle.lineHeight}};"
+  >
+    <!-- 左侧：侧边栏切换按钮 -->
+    <view class="nav-left" style="position: relative; left: 0rpx; top: 102rpx">
+      <view 
+        class="nav-btn sidebar-toggle {{sidebarOpen ? 'active' : ''}}" 
+        bindtap="toggleSidebar"
+      >
+        <view class="hamburger">
+          <view class="line"></view>
+          <view class="line"></view>
+          <view class="line"></view>
+        </view>
+      </view>
+      <!-- 新建对话按钮（文本版） -->
+      <view class="nav-btn new-chat" bindtap="startNewChat" style="position: relative; left: -18rpx; top: -2rpx; height: 60rpx; display: flex; box-sizing: border-box; width: 154rpx">
+        <text>+</text>
+        <view class="btn-text">新对话</view>
+      </view>
+    </view>
+    
+    <!-- 中间：页面标题 -->
+    <view class="nav-title" style="position: relative; left: 0rpx; top: 142rpx"></view>
+    
+    <!-- 右侧：占位区 -->
+    <view class="nav-right"></view>
+  </view>
+
+  <!-- ========== 主要内容区域 ========== -->
+  <view class="center" style="padding-top: {{centerPaddingTop}}px;">
+    <!-- 初始状态：欢迎界面 -->
+    <view wx:if="{{messages.length === 0 && !loading}}" class="initial-state">
+      <!-- 欢迎动画区域（文本版） -->
+      <view class="welcome-animation">
+				<image 
+          src="../../images/logo.png" 
+          mode="aspectFit"
+          class="welcome-logo"
+        />
+      </view>
+      <!-- 欢迎标题 -->
+      <view class="welcome-title">
+        <view class="title-main">AI 医疗助手</view>
+        <view class="title-sub">您的智能健康伙伴</view>
+      </view>
+      <!-- 功能提示卡片（简化版） -->
+      <view class="feature-cards">
+        <view class="feature-card">
+          <view class="feature-icon">🏥</view>
+          <view class="feature-title">症状分析</view>
+        </view>
+        <view class="feature-card">
+          <view class="feature-icon">💊</view>
+          <view class="feature-title">用药建议</view>
+        </view>
+        <view class="feature-card">
+          <view class="feature-icon">📅</view>
+          <view class="feature-title">健康记录</view>
+        </view>
+      </view>
+      <!-- 输入提示 -->
+      <view class="input-hint">
+        <view class="hint-title">您可以这样提问：</view>
+        <view class="hint-examples">
+          <view class="hint-example" bindtap="useExample" data-example="咳嗽三天了，有痰怎么办？">咳嗽三天了，有痰怎么办？</view>
+          <view class="hint-example" bindtap="useExample" data-example="头痛、发烧，可能是什么原因？">头痛、发烧，可能是什么原因？</view>
+          <view class="hint-example" bindtap="useExample" data-example="高血压患者日常需要注意什么？">高血压患者日常需要注意什么？</view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 对话状态：消息列表 -->
+    <scroll-view 
+      wx:else 
+      class="message-list" 
+      scroll-y="{{true}}" 
+      scroll-into-view="{{scrollToView}}"
+      bindscroll="onMessageScroll"
+    >
+      <!-- 消息列表容器 -->
+      <view class="messages-container">
+        <block wx:for="{{messages}}" wx:key="index">
+          <!-- 用户消息 -->
+          <view 
+            wx:if="{{item.type === 'user'}}" 
+            class="message-item user-message"
+            id="message-{{index}}"
+          >
+            <!-- 消息内容 -->
+            <view class="message-bubble">
+              <view class="message-content"  user-select>
+                {{item.content}}
+              </view>
+              <!-- 消息时间 -->
+              <view class="message-time" wx:if="{{item.time}}">
+                {{item.time}}
+              </view>
+            </view>
+          </view>
+          
+          <!-- AI消息 -->
+          <view 
+            wx:else 
+            class="message-item ai-message"
+            id="message-{{index}}"
+          >
+            <!-- 消息内容 -->
+            <view class="message-bubble"  user-select>
+              <!-- 加载动画（文本版） -->
+              <view 
+                wx:if="{{item.streaming && index === messages.length - 1}}" 
+                class="typing-indicator"
+              >
+                <text>...</text>
+              </view>
+              <!-- 流式显示的内容 -->
+              <view class="message-content">
+                <!-- 逐字显示的内容 -->
+                <text>{{item.displayContent}}</text>
+                <!-- 光标动画 -->
+                <view 
+                  wx:if="{{item.streaming && index === messages.length - 1}}" 
+                  class="streaming-cursor"
+                ></view>
+              </view>
+              <!-- 消息时间 -->
+              <view class="message-time" wx:if="{{item.time}}">
+                {{item.time}}
+              </view>
+            </view>
+          </view>
+        </block>
         
-        <!-- AI消息 -->
-        <view wx:else class="message-item ai-message" id="message-{{index}}">
-          <view class="message-content ai-content">
-            {{item.content}}
+        <!-- 加载中状态 -->
+        <view 
+          wx:if="{{loading}}" 
+          class="message-item ai-message loading-message"
+          id="message-loading"
+        >
+          <view class="message-avatar">🤖</view>
+          <view class="message-bubble">
+            <view class="loading-text">AI正在思考中...</view>
           </view>
-        </view>
-      </block>
-      
-      <!-- 加载中状态 -->
-      <view wx:if="{{loading}}" class="message-item ai-message" id="message-loading">
-        <view class="message-content ai-content">
-          正在思考...
         </view>
       </view>
     </scroll-view>
   </view>
 
-  <!-- 底部输入栏 -->
-  <view class="composer" style="padding-bottom: calc(16rpx + env(safe-area-inset-bottom));">
-    <view class="composer-inner">
-      <textarea
-        class="input"
-        placeholder="请输入症状，例如：咳嗽三天、喉咙痛、低烧"
-        placeholder-class="placeholder"
-        value="{{text}}"
-        bindinput="onInput"
-        bindconfirm="onSend"
-        auto-height
-        maxlength="1000"
-      />
-      <button
-        class="send"
-        hover-class="send-hover"
-        disabled="{{!canSend}}"
-        bindtap="onSend"
-      >
-        发送
-      </button>
+  <!-- ========== 底部输入区域 ========== -->
+  <view 
+    class="composer" 
+    style="padding-bottom: calc(20rpx + env(safe-area-inset-bottom));"
+  >
+    <!-- 输入区域容器 -->
+    <!-- 输入区域容器 - 移除固定高度 -->
+		<view class="composer-inner" style="display: flex; box-sizing: border-box; width: 700rpx; min-height: 79rpx; align-items: flex-start;">
+			<!-- 文本输入框 - 让textarea高度自适应 -->
+			<textarea 
+				style="position: relative; left: 0rpx; top: 2rpx; display: block; box-sizing: border-box; flex: 1;"
+				class="input {{canSend ? 'has-content' : ''}}"
+				placeholder="说点什么吧..."
+				placeholder-class="placeholder"
+				value="{{text}}"
+				bindinput="onInput"
+				bindconfirm="onSend"
+				auto-height
+				maxlength="1000"
+				cursor-spacing="20"
+			/>
+			<!-- 发送按钮 - 调整位置 -->
+			<view 
+				class="send-btn {{canSend ? 'active' : ''}} {{sending ? 'sending' : ''}}"
+				bindtap="onSend"
+				hover-class="send-btn-hover"
+				style="height: 45rpx; display: flex; box-sizing: border-box; width: 106rpx; position: relative; left: -8rpx; top: 16rpx; flex-shrink: 0;">
+				<view class="send-text">发送</view>
+			</view>
+		</view>
+    
+    <!-- 安全提示 -->
+    <view class="safety-hint">
+      <view class="hint-icon">⚠️</view>
+      <view class="hint-text">
+        重要提示：AI提供的信息仅供参考，不能替代专业医疗建议
+      </view>
     </view>
-    <view class="hint">提示：我不是医生，如有紧急情况请立即就医/拨打急救电话。</view>
   </view>
 
-  <!-- 登录提示底部弹窗 -->
-  <view wx:if="{{loginModalVisible}}" class="modal-overlay" bindtap="hideLoginModal"></view>
-  <view wx:if="{{loginModalVisible}}" class="login-modal">
-    <view class="login-modal-content">
-      <view class="login-modal-title">请先登录</view>
-      <button class="login-btn wechat-login" bindtap="onWechatLogin">微信一键登录</button>
-      <button class="login-btn cancel" bindtap="hideLoginModal">取消</button>
+  <!-- ========== 登录模态框 ========== -->
+  <view wx:if="{{loginModalVisible}}" class="modal-container">
+    <!-- 遮罩层 -->
+    <view 
+      class="modal-overlay" 
+      bindtap="hideLoginModal"
+    ></view>
+    <!-- 登录对话框 -->
+    <view class="login-modal">
+      <!-- 模态框内容 -->
+      <view class="login-modal-content">
+        <!-- 关闭按钮（文本版） -->
+        <view class="modal-close" bindtap="hideLoginModal">
+          <text>✕</text>
+        </view>
+        <!-- 标题区域 -->
+        <view class="modal-header">
+          <view class="modal-logo">👨‍⚕️</view>
+          <view class="modal-title">欢迎使用AI医疗助手</view>
+          <view class="modal-subtitle">登录以继续使用完整功能</view>
+        </view>
+        <!-- 登录选项 -->
+        <view class="login-options">
+          <!-- 微信登录 -->
+          <button 
+            class="login-option wechat-login"
+            bindtap="onWechatLogin"
+            hover-class="login-option-hover"
+          >
+            <view class="option-icon">📱</view>
+            <view class="option-text">微信一键登录</view>
+          </button>
+          <!-- 游客继续 -->
+          <view class="guest-option" bindtap="continueAsGuest">
+            <view class="guest-text">暂不登录，继续使用</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 用户信息编辑弹窗 -->
+<view wx:if="{{showProfileEdit}}" class="profile-edit-modal">
+  <!-- 遮罩层 -->
+  <view class="modal-overlay" bindtap="closeProfileEdit"></view>
+  
+  <!-- 编辑内容区域 -->
+  <view class="profile-edit-content">
+    <view class="profile-edit-header">
+      <view class="title">完善个人信息</view>
+      <view class="close-btn" bindtap="closeProfileEdit">✕</view>
+    </view>
+    
+    <!-- 头像选择 -->
+    <view class="avatar-section">
+      <view class="section-title">选择头像</view>
+      <!-- 使用button组件，设置open-type为chooseAvatar -->
+      <button 
+        class="avatar-btn" 
+        open-type="chooseAvatar" 
+        bindchooseavatar="onChooseAvatar"
+        style="width: 120rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx"
+      >
+        <view wx:if="{{profileEditData.avatarUrl}}" class="avatar-image">
+          <image src="{{profileEditData.avatarUrl}}" mode="aspectFill"></image>
+        </view>
+        <view wx:else class="avatar-placeholder">
+          <text>轻触选择</text>
+        </view>
+      </button>
+    </view>
+    
+    <!-- 昵称输入 -->
+    <view class="nickname-section">
+      <view class="section-title">设置昵称</view>
+      <!-- 使用input组件获取昵称 -->
+      <input 
+        class="nickname-input" 
+        placeholder="请输入昵称(1-8个字符)" 
+        value="{{profileEditData.nickname}}"
+        bindinput="onNicknameInput"
+        maxlength="8"
+        type="nickname"
+      />
+    </view>
+    
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="cancel-btn" bindtap="closeProfileEdit">取消</button>
+      <button class="confirm-btn" bindtap="submitUserInfo">确认</button>
     </view>
   </view>
 </view>
