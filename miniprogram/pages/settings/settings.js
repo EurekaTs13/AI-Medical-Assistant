@@ -191,7 +191,7 @@ Page({
   showAboutModal: function () {
     wx.showModal({
       title: '关于我们',
-      content: 'AI医疗助手 v1.0.0\n\n我们致力于为用户提供专业的医疗健康咨询服务。\n\n本应用仅供参考，不能替代专业医疗建议。',
+      content: '智绘青囊 v0.1.0\n\n我们致力于为用户提供专业的医疗健康咨询服务。\n\n本应用仅供参考，不能替代专业医疗建议。',
       showCancel: false,
       confirmText: '我知道了',
       confirmColor: '#667eea'
@@ -202,7 +202,7 @@ Page({
   showContactModal: function () {
     wx.showModal({
       title: '联系我们',
-      content: '客服邮箱：service@aimedical.com\n客服电话：400-123-4567\n工作时间：9:00-18:00',
+      content: '客服邮箱：\n工作时间：9:00-18:00',
       showCancel: false,
       confirmText: '知道了',
       confirmColor: '#667eea',

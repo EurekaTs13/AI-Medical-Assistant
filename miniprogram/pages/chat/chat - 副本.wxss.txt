@@ -471,8 +471,8 @@
 }
 
 .title-sub {
-  font-size: 22rpx;
-  color: #6b7280d7;
+  font-size: 28rpx;
+  color: #6b7280;
   font-weight: 400;
   letter-spacing: 0.5px;
 }
@@ -508,21 +508,6 @@
 .feature-icon {
   font-size: 40rpx;
   margin-bottom: 12rpx;
-  /* 新增以下样式 */
-  width: 60rpx;        /* 设置固定宽度 */
-  height: 60rpx;       /* 设置固定高度 */
-  display: flex;       /* 使用flex布局居中 */
-  align-items: center; /* 垂直居中 */
-  justify-content: center; /* 水平居中 */
-  margin: 0 auto 12rpx; /* 自动水平居中，底部间距12rpx */
-}
-
-/* 确保image元素占满容器 */
-.feature-icon image {
-  width: 100%;         /* 宽度占满父容器 */
-  height: 100%;        /* 高度占满父容器 */
-  object-fit: contain; /* 保持宽高比，完整显示图片 */
-  display: block;      /* 块级显示，避免底部间隙 */
 }
 
 .feature-title {
@@ -630,20 +615,6 @@
   margin: 0 16rpx;
   font-size: 32rpx;
   transition: all 0.2s ease;
-	display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;  /* 防止图片溢出 */
-}
-
-/* 添加AI头像图片的样式 */
-.ai-message .avatar-image {
-  width: 100%;           /* 占满父容器宽度 */
-  height: 100%;          /* 占满父容器高度 */
-  object-fit: cover;      /* 保持宽高比并填充，可裁剪 */
-  /* 或使用 object-fit: contain; 完整显示图片但不裁剪 */
-  border-radius: 12rpx;  /* 保持与父容器相同的圆角 */
-  display: block;        /* 消除图片底部间隙 */
 }
 
 .user-message .message-avatar {
@@ -653,7 +624,7 @@
 }
 
 .ai-message .message-avatar {
-  background: #ffffff;
+  background: #10b981;
   color: white;
 }
 
@@ -939,16 +910,10 @@
 }
 
 .modal-logo {
-	width: 120rpx;           /* 设置图片容器宽度 */
-  height: 120rpx;         /* 设置图片容器高度 */
-  margin: 0 auto 20rpx;   /* 保持原有外边距 */
-  animation: float 2s ease-in-out infinite; /* 保持浮动动画 */
-  display: flex;           /* 使用flex布局 */
-  align-items: center;     /* 垂直居中 */
-  justify-content: center; /* 水平居中 */
-  overflow: hidden;        /* 防止图片溢出 */
-  border-radius: 50%;      /* 可选：如果需要圆形logo */
-  background-color: transparent; /* 透明背景 */
+  font-size: 60rpx;
+  margin: 0 auto 20rpx;
+  animation: float 2s ease-in-out infinite;
+  color: #3b82f6;
 }
 
 .modal-title {

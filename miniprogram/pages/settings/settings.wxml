@@ -150,7 +150,11 @@
 
       <!-- 版本信息 -->
       <view class="version-info">
-        <view class="copyright">© 2024 AI医疗助手 版权所有</view>
+				<view class="copyright">科技创新2030“四大慢病重大专项”——“我国重大慢病防治适宜技术推广机制、模式与示范”</view>
+				<view class="copyright">（项目编号:2024ZD0524300）</view>
+				<view class="copyright">“慢病防治技术推广的一体化数智平台和支撑体系研究”</view>
+				<view class="copyright">（课题编号:2024ZD0524302）</view>
+        <view class="copyright">© 2026 智绘青囊 版权所有</view>
       </view>
     </view>
   </view>
