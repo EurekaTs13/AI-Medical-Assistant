@@ -1,4 +1,5 @@
 // pages/chat/chat.js
+//注意：上线前已关闭调试功能，开发环境下请在app.js文件开始处打开console的调试方法。
 const app = getApp();
 
 Page({
