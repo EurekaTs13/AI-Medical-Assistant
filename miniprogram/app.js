@@ -1,4 +1,14 @@
 // app.js
+// 将 isDebug 设置为 false 即可全局禁用console调试
+const isDebug = true; // 上线前改为 false
+if (!isDebug) {
+  console.log = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+  console.debug = () => {};
+}
+
 App({
   globalData: {
     openid: null,
@@ -6,6 +16,8 @@ App({
     env: "cloud1-8gqij1hff49654b7",
 		userInfo:null
   },
+
+	
 
   onLaunch: function () {
     if (!wx.cloud) {
@@ -80,5 +92,6 @@ App({
 		wx.reLaunch({
 			url:'/pages/chat/chat?loadWithoutCheck=true'
 		})
-  }
+  },
+
 });
